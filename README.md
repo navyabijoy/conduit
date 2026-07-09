@@ -11,7 +11,7 @@ Conduit handles the heavy lifting of:
 
 ---
 
-## 🏗 Project Architecture
+## Project Architecture
 
 The diagram below illustrates how the components of Conduit communicate:
 
@@ -84,7 +84,7 @@ conduit-go/
 
 ---
 
-## ⚡ Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -115,7 +115,7 @@ export CONDUIT_ENCRYPTION_KEY="your-32-byte-long-secret-key-here"
 
 ---
 
-## 🛠 Command Line Flags
+## Command Line Flags
 
 You can customize the execution of the main binary:
 
@@ -127,7 +127,7 @@ You can customize the execution of the main binary:
 
 ---
 
-## 🧩 Developing Custom Connectors
+## Developing Custom Connectors
 
 To create a new integration, you can use the built-in scaffolding CLI tool.
 
