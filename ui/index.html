@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conduit — Integration Gateway</title>
+  <meta name="description" content="Conduit is an integration marketplace for building, distributing, and monitoring SaaS connector instances." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/ui/app.css" />
+</head>
+<body>
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">Conduit</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-view="catalog" id="nav-catalog">
+        <span class="nav-icon">🧩</span> Catalog
+      </a>
+      <a href="#" class="nav-item" data-view="instances" id="nav-instances">
+        <span class="nav-icon">🔗</span> Instances
+        <span class="badge" id="instances-badge">0</span>
+      </a>
+      <a href="#" class="nav-item" data-view="execute" id="nav-execute">
+        <span class="nav-icon">▶</span> Execute
+      </a>
+      <a href="#" class="nav-item" data-view="metrics" id="nav-metrics">
+        <span class="nav-icon">📊</span> Metrics
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/openapi.json" target="_blank" class="footer-link">OpenAPI Spec ↗</a>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ── -->
+  <main class="main-content">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-title" id="view-title">Integration Catalog</div>
+      <div class="topbar-actions">
+        <div class="status-pill" id="gateway-status">
+          <span class="pulse"></span> Gateway Online
+        </div>
+      </div>
+    </header>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ── View: Catalog ── -->
+    <section class="view active" id="view-catalog">
+      <div class="section-header">
+        <h1>Available Integrations</h1>
+        <p>Browse and install connectors to link your services.</p>
+      </div>
+      <div class="cards-grid" id="catalog-grid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </section>
+
+    <!-- ── View: Instances ── -->
+    <section class="view" id="view-instances">
+      <div class="section-header">
+        <h1>Installed Instances</h1>
+        <p>Manage active connector instances and monitor drift status.</p>
+      </div>
+      <div id="instances-list" class="instances-list">
+        <div class="empty-state">No instances installed yet. Install a connector from the Catalog.</div>
+      </div>
+    </section>
+
+    <!-- ── View: Execute ── -->
+    <section class="view" id="view-execute">
+      <div class="section-header">
+        <h1>Execute Endpoint</h1>
+        <p>Send requests to connector endpoints and inspect the response.</p>
+      </div>
+      <div class="execute-panel">
+        <div class="form-group">
+          <label for="exec-instance">Instance</label>
+          <select id="exec-instance" class="form-select"></select>
+        </div>
+        <div class="form-group">
+          <label for="exec-endpoint">Endpoint</label>
+          <select id="exec-endpoint" class="form-select"></select>
+        </div>
+        <div class="form-group">
+          <label for="exec-body">Request Body (JSON)</label>
+          <textarea id="exec-body" class="form-textarea" rows="8" placeholder='{"channel": "C123", "text": "Hello!"}'></textarea>
+        </div>
+        <button class="btn btn-primary" id="exec-btn" onclick="executeEndpoint()">
+          ▶ Execute
+        </button>
+        <div class="response-box" id="response-box" style="display:none">
+          <div class="response-header">
+            <span>Response</span>
+            <span class="response-status" id="response-status"></span>
+          </div>
+          <pre id="response-body" class="response-body"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── View: Metrics ── -->
+    <section class="view" id="view-metrics">
+      <div class="section-header">
+        <h1>Observability</h1>
+        <p>Live metrics exposed via Prometheus. Use Grafana or any compatible scraper to visualise.</p>
+      </div>
+      <div class="metrics-panel">
+        <div class="metric-card">
+          <div class="metric-label">Prometheus Endpoint</div>
+          <div class="metric-value">
+            <a href="/metrics" target="_blank" class="metric-link">/metrics ↗</a>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">OpenAPI Spec</div>
+          <div class="metric-value">
+            <a href="/openapi.json" target="_blank" class="metric-link">/openapi.json ↗</a>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Drift Detector</div>
+          <div class="metric-value" id="metric-drift-status">Runs every 30s</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Active Instances</div>
+          <div class="metric-value" id="metric-instances-count">—</div>
+        </div>
+      </div>
+      <div class="section-header" style="margin-top:2rem">
+        <h2>Tracked Metrics</h2>
+      </div>
+      <div class="metrics-table-wrapper">
+        <table class="metrics-table">
+          <thead>
+            <tr><th>Metric</th><th>Labels</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>conduit_request_duration_seconds</code></td><td>connector_id, endpoint, status</td><td>Latency histogram of endpoint calls</td></tr>
+            <tr><td><code>conduit_request_errors_total</code></td><td>connector_id, endpoint, error_type</td><td>Total error count by type (transient/permanent)</td></tr>
+            <tr><td><code>conduit_token_refreshes_total</code></td><td>connector_id, status</td><td>OAuth token refresh attempts</td></tr>
+            <tr><td><code>conduit_webhook_failures_total</code></td><td>connector_id, reason</td><td>Failed webhook deliveries</td></tr>
+            <tr><td><code>conduit_drift_detections_total</code></td><td>connector_id, result</td><td>Schema drift scan outcomes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── Install Modal ── -->
+  <div class="modal-backdrop" id="install-modal" style="display:none">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <h2 id="modal-title">Install Connector</h2>
+        <button class="modal-close" onclick="closeInstallModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Dynamically injected -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/ui/app.js"></script>
+</body>
+</html>
