@@ -5,15 +5,16 @@
 
 const API = '';   // Same origin — no base URL prefix needed
 
-// ─── Connector icons & colours ───────────────────────────────────────────────
+// ─── Connector meta (initials + accent colour) ───────────────────────────────
 const CONNECTOR_META = {
-  slack:  { icon: '💬', color: '#e01e5a' },
-  github: { icon: '🐙', color: '#6e5494' },
-  stripe: { icon: '💳', color: '#635bff' },
+  slack:  { abbr: 'SL', color: '#E01E5A' },
+  github: { abbr: 'GH', color: '#24292F' },
+  stripe: { abbr: 'ST', color: '#635BFF' },
 };
 
 function connMeta(id) {
-  return CONNECTOR_META[id] || { icon: '🔌', color: '#6366f1' };
+  const abbr = id ? id.slice(0, 2).toUpperCase() : '??';
+  return CONNECTOR_META[id] || { abbr, color: '#2563EB' };
 }
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
@@ -74,7 +75,7 @@ function buildConnectorCard(conn) {
 
   card.innerHTML = `
     <div class="card-header">
-      <span class="card-icon">${meta.icon}</span>
+      <span class="card-icon" style="background:${meta.color}">${meta.abbr}</span>
       <span class="card-category">${conn.category || 'Integration'}</span>
     </div>
     <div class="card-name">${conn.name}</div>
@@ -83,7 +84,7 @@ function buildConnectorCard(conn) {
   `;
 
   const installBtn = el('button', 'btn btn-primary btn-sm');
-  installBtn.textContent = '⚡ Install';
+  installBtn.textContent = 'Install';
   installBtn.onclick = () => openInstallModal(conn);
   card.appendChild(installBtn);
 
@@ -104,7 +105,7 @@ function openInstallModal(conn) {
 
   if (isAPIKey) {
     body.innerHTML = `
-      <p>${meta.icon} <strong>${conn.name}</strong> uses an <strong>API key</strong> for authentication.</p>
+      <p><strong>${conn.name}</strong> uses an <strong>API key</strong> for authentication.</p>
       <div class="form-group">
         <label for="modal-api-key">API Key</label>
         <input id="modal-api-key" class="form-input" type="password" placeholder="sk_live_..." autocomplete="off" />
@@ -116,7 +117,7 @@ function openInstallModal(conn) {
     `;
   } else {
     body.innerHTML = `
-      <p>${meta.icon} <strong>${conn.name}</strong> uses <strong>OAuth 2.0</strong>. You'll be redirected to the provider to authorise access.</p>
+      <p><strong>${conn.name}</strong> uses <strong>OAuth 2.0</strong>. You'll be redirected to the provider to authorise access.</p>
       <p>Requested scopes: <strong>${(conn.scopes || []).join(', ')}</strong></p>
       <div class="modal-actions">
         <button class="btn btn-secondary" onclick="closeInstallModal()">Cancel</button>
@@ -200,15 +201,15 @@ function buildInstanceRow(inst) {
 
   const row = el('div', 'instance-row');
   row.innerHTML = `
-    <span style="font-size:1.5rem">${meta.icon}</span>
+    <span class="instance-icon" style="background:${meta.color}">${meta.abbr}</span>
     <div class="instance-info">
       <div class="instance-connector">${inst.connector_id}</div>
       <div class="instance-id">${inst.id}</div>
     </div>
     <span class="status-badge ${statusClass}">${inst.status}</span>
     <div class="instance-actions">
-      <button class="btn btn-secondary btn-sm" onclick="quickExecute('${inst.id}', '${inst.connector_id}')">▶ Execute</button>
-      <button class="btn btn-danger btn-sm" onclick="deleteInstance('${inst.id}')">✕ Remove</button>
+      <button class="btn btn-secondary btn-sm" onclick="quickExecute('${inst.id}', '${inst.connector_id}')">Execute</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteInstance('${inst.id}')">Remove</button>
     </div>
   `;
   return row;
@@ -301,7 +302,7 @@ async function executeEndpoint() {
   }
 
   const btn = document.getElementById('exec-btn');
-  btn.textContent = '⏳ Executing…';
+  btn.textContent = 'Executing…';
   btn.disabled = true;
 
   const responseBox    = document.getElementById('response-box');
@@ -337,7 +338,7 @@ async function executeEndpoint() {
   } catch (err) {
     toast('Request failed: ' + err.message, 'error');
   } finally {
-    btn.textContent = '▶ Execute';
+    btn.textContent = 'Execute';
     btn.disabled = false;
   }
 }
@@ -369,11 +370,16 @@ async function apiFetch(path, options = {}) {
   return data;
 }
 
+const TOAST_ICONS = {
+  success: `<svg class="toast-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><polyline points="5,8.5 7,10.5 11,6"/></svg>`,
+  error:   `<svg class="toast-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="5.5" y1="5.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="5.5" x2="5.5" y2="10.5"/></svg>`,
+  info:    `<svg class="toast-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="7" x2="8" y2="11"/><circle cx="8" cy="5" r="0.5" fill="currentColor"/></svg>`,
+};
+
 function toast(message, type = 'info') {
   const container = document.getElementById('toast-container');
   const t = el('div', `toast toast-${type}`);
-  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
-  t.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+  t.innerHTML = `${TOAST_ICONS[type] || TOAST_ICONS.info}<span>${message}</span>`;
   container.appendChild(t);
   setTimeout(() => t.remove(), 4000);
 }

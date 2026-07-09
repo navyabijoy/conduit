@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Conduit — Integration Gateway</title>
-  <meta name="description" content="Conduit is an integration marketplace for building, distributing, and monitoring SaaS connector instances." />
+  <meta name="description" content="Conduit is an integration gateway for building, distributing, and monitoring SaaS connector instances." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/ui/app.css" />
 </head>
@@ -13,26 +14,57 @@
   <!-- ── Sidebar ── -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <span class="logo-icon">⚡</span>
+      <svg class="logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="2" y="2" width="10" height="10" rx="1" fill="#533AFD"/>
+        <rect x="16" y="2" width="10" height="10" rx="1" fill="#533AFD" opacity="0.6"/>
+        <rect x="2" y="16" width="10" height="10" rx="1" fill="#FF6118" opacity="0.8"/>
+        <rect x="16" y="16" width="10" height="10" rx="1" fill="#FF6118" opacity="0.4"/>
+      </svg>
       <span class="logo-text">Conduit</span>
     </div>
     <nav class="sidebar-nav">
       <a href="#" class="nav-item active" data-view="catalog" id="nav-catalog">
-        <span class="nav-icon">🧩</span> Catalog
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="2" width="7" height="7" rx="1.5"/>
+          <rect x="11" y="2" width="7" height="7" rx="1.5"/>
+          <rect x="2" y="11" width="7" height="7" rx="1.5"/>
+          <rect x="11" y="11" width="7" height="7" rx="1.5"/>
+        </svg>
+        Catalog
       </a>
       <a href="#" class="nav-item" data-view="instances" id="nav-instances">
-        <span class="nav-icon">🔗</span> Instances
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="5" cy="10" r="2.5"/>
+          <circle cx="15" cy="5" r="2.5"/>
+          <circle cx="15" cy="15" r="2.5"/>
+          <line x1="7.5" y1="8.8" x2="12.5" y2="6.2"/>
+          <line x1="7.5" y1="11.2" x2="12.5" y2="13.8"/>
+        </svg>
+        Instances
         <span class="badge" id="instances-badge">0</span>
       </a>
       <a href="#" class="nav-item" data-view="execute" id="nav-execute">
-        <span class="nav-icon">▶</span> Execute
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="5,3 17,10 5,17" stroke-linejoin="round"/>
+        </svg>
+        Execute
       </a>
       <a href="#" class="nav-item" data-view="metrics" id="nav-metrics">
-        <span class="nav-icon">📊</span> Metrics
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="2,14 7,8 11,12 16,5 18,5"/>
+          <line x1="2" y1="17" x2="18" y2="17"/>
+        </svg>
+        Metrics
       </a>
     </nav>
     <div class="sidebar-footer">
-      <a href="/openapi.json" target="_blank" class="footer-link">OpenAPI Spec ↗</a>
+      <a href="/docs" target="_blank" class="footer-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px;">
+          <path d="M2 2h5v2H4v8h8v-3h2v5H2z"/>
+          <path d="M9 2h5v5h-2V5.4L7.4 10 6 8.6 10.6 4H9z"/>
+        </svg>
+        OpenAPI Spec
+      </a>
     </div>
   </aside>
 
@@ -95,7 +127,10 @@
           <textarea id="exec-body" class="form-textarea" rows="8" placeholder='{"channel": "C123", "text": "Hello!"}'></textarea>
         </div>
         <button class="btn btn-primary" id="exec-btn" onclick="executeEndpoint()">
-          ▶ Execute
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;" aria-hidden="true">
+            <polygon points="3,2 14,8 3,14"/>
+          </svg>
+          Execute
         </button>
         <div class="response-box" id="response-box" style="display:none">
           <div class="response-header">
@@ -122,8 +157,10 @@
         </div>
         <div class="metric-card">
           <div class="metric-label">OpenAPI Spec</div>
-          <div class="metric-value">
-            <a href="/openapi.json" target="_blank" class="metric-link">/openapi.json ↗</a>
+          <div class="metric-value" style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+            <a href="/docs" target="_blank" class="metric-link">Interactive Docs ↗</a>
+            <span style="color:var(--text-muted); font-size:0.9rem;">|</span>
+            <a href="/openapi.json" target="_blank" class="metric-link" style="color:var(--text-secondary); font-size:0.9rem;">Raw JSON ↗</a>
           </div>
         </div>
         <div class="metric-card">
@@ -160,7 +197,11 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-header">
         <h2 id="modal-title">Install Connector</h2>
-        <button class="modal-close" onclick="closeInstallModal()">✕</button>
+        <button class="modal-close" onclick="closeInstallModal()" aria-label="Close">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;" aria-hidden="true">
+            <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
+          </svg>
+        </button>
       </div>
       <div class="modal-body" id="modal-body">
         <!-- Dynamically injected -->
