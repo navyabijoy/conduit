@@ -63,6 +63,8 @@ func (g *Gateway) Start(addr string) {
 
 	// OpenAPI and Metrics
 	mux.HandleFunc("/openapi.json", g.handleOpenAPISpec)
+	mux.HandleFunc("/docs", g.handleDocs)
+	mux.HandleFunc("/docs/", g.handleDocs)
 	mux.Handle("/metrics", promhttp.Handler())
 
 	// UI Dashboard — serves static files from ./ui/

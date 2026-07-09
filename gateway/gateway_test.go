@@ -62,6 +62,8 @@ func gatewayServer(t *testing.T, gw *Gateway) *httptest.Server {
 	mux.HandleFunc("/v1/instances/", gw.handleInstanceRoute)
 	mux.HandleFunc("/webhooks/", gw.handleWebhookPayload)
 	mux.HandleFunc("/openapi.json", gw.handleOpenAPISpec)
+	mux.HandleFunc("/docs", gw.handleDocs)
+	mux.HandleFunc("/docs/", gw.handleDocs)
 
 	return httptest.NewServer(mux)
 }
@@ -881,5 +883,25 @@ func TestHandleOpenAPISpec(t *testing.T) {
 			}
 			return keys
 		}())
+	}
+}
+
+func TestHandleDocs(t *testing.T) {
+	gw, _, cleanup := newTestGateway(t)
+	defer cleanup()
+	ts := gatewayServer(t, gw)
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/docs")
+	if err != nil {
+		t.Fatalf("GET /docs: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("want 200, got %d", resp.StatusCode)
+	}
+	if ct := resp.Header.Get("Content-Type"); !strings.Contains(ct, "text/html") {
+		t.Fatalf("want HTML content-type, got %q", ct)
 	}
 }
